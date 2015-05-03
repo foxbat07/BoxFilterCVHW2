@@ -24,16 +24,26 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
+        ofImage addBorders (ofImage image);
+        ofImage calculateIntegralImage (ofImage image);
+        ofImage blurImage (ofImage image);
+        ofImage createTestImage (ofImage image);
     
-        int boxFilterSize = 3;
-        int testHeight = 16;
-        int testWidth = 16;
+    
+    
+        int boxFilterSize = 5;
+        int testHeight = 10 + 2 * boxFilterSize;
+        int testWidth = 10 + 2 * boxFilterSize;
         
     
         ofImage inputImage;
         ofImage testOneImage;
         ofImage testIntegralImage;
         ofImage POIImage;
+        ofImage newBlurImage;
+    
+        ofImage inputImageWithBorders;
+    
     
         Mat inputImagetoMat;
         Mat testOneImagetoMat;
