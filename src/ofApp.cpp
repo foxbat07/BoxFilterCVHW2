@@ -6,27 +6,27 @@ void ofApp::setup(){
     
     // getting in notredame image
     inputImage.loadImage("notredame.png");
-    inputImagetoMat = toCv(inputImage);
+   
     imageWidth = inputImage.getWidth();
     imageHeight= inputImage.getHeight();
     
-    
     //testWidth = imageWidth;
     //testHeight = imageHeight;
-    
     
     // creating an image of 1s,using ofImage to intialize then convert to Mat
     testOneImage.allocate(testWidth, testHeight, OF_IMAGE_GRAYSCALE);
     testIntegralImage.allocate(testWidth, testHeight, OF_IMAGE_GRAYSCALE);
     newBlurImage.allocate(testWidth, testHeight, OF_IMAGE_GRAYSCALE);
-
-
+    cout<< "allocated images"<<endl;
+    //inputImageWithBorders = addBorders(inputImage);
     testOneImage = createTestImage(testOneImage);
+    cout<< "added borders"<<endl;
+    //testIntegralImage = calculateIntegralImage(inputImageWithBorders);
     testIntegralImage = calculateIntegralImage(testOneImage);
+    cout<<"created integral image";
     newBlurImage = blurImage(testIntegralImage);
+    cout<<"created blur image";
     
-    
-
     
     
 }
@@ -39,16 +39,33 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    ofBackground(255);
-    drawMat(inputImagetoMat,0, 0);
-    
+    ofBackground(128);
     
     //testOneImage.draw(ofGetWidth()/2,0, testWidth* 20, testHeight *10);
+    int xDisplacement = 100 ;
+    int yDisplacement = 300 ;
+    int multiplier = 5;
     
-    drawMat( testOneImagetoMat, 500, 100 );
-    drawMat(myKernel, 600, 100);
     
-    //drawMat(testOneImage, ofGetWidth()/2 , 0);
+    testOneImage.draw( xDisplacement, yDisplacement / 2 , testWidth * multiplier, testHeight* multiplier);
+    testIntegralImage.draw(xDisplacement* 5.5 ,yDisplacement /2  , testWidth* multiplier, testHeight* multiplier);
+    newBlurImage.draw(xDisplacement* 11, yDisplacement /2 , testWidth* multiplier, testHeight* multiplier);
+    
+    ofDrawBitmapString("Black image with padding ", xDisplacement , yDisplacement /4);
+    
+    ofDrawBitmapString("integral image ", xDisplacement* 5.5, yDisplacement /4);
+    
+    ofDrawBitmapString(" blurred image", xDisplacement* 11, yDisplacement /4);
+    
+    ofDrawBitmapString("noise from the surroudding padding ", xDisplacement* 11, yDisplacement /6);
+    
+    
+
+    
+    //testIntegralImage.draw(testWidth ,0 , ofGetWidth()  , ofGetHeight());
+    drawNumbers();
+    
+    
     
     
     
@@ -58,8 +75,34 @@ void ofApp::draw(){
 
 
 
-ofImage addBorders (ofImage image);
+ofImage ofApp::addBorders (ofImage image)
+{
+    imageWidth = inputImage.getWidth();
+    imageHeight= inputImage.getHeight();
+    
+    testWidth = imageWidth + 2 * boxFilterSize;
+    testHeight = imageHeight + 2 * boxFilterSize;
+    inputImageWithBorders.allocate(testWidth, testHeight, OF_IMAGE_GRAYSCALE);
 
+    for (int i = 0 ; i < image.getPixelsRef().size()  ;i++) {
+        
+        inputImageWithBorders.getPixelsRef()[i] = 0.0f; // make them white for now
+        
+    }
+    
+    for ( int i = 0 ; i < testHeight ; i++ )
+    {
+        for (int j = 0 ; j< testWidth ; j++)
+        {
+            inputImageWithBorders.getPixelsRef()[( i+boxFilterSize) * testWidth + (j+boxFilterSize) ] = image.getPixelsRef()[i * testWidth + j] ;
+            
+        }
+    }
+    
+    inputImageWithBorders.reloadTexture();
+    return inputImageWithBorders;
+    
+}
 
 
 
@@ -115,13 +158,12 @@ ofImage ofApp::blurImage (ofImage image)
             tempCalc = testIntegralImage.getPixelsRef()[ i*testHeight+ j]
             +testIntegralImage.getPixelsRef()[ (i - boxFilterSize)*testHeight+ (j - boxFilterSize) ]
             - testIntegralImage.getPixelsRef()[ (i - boxFilterSize)*testHeight+ j ]
-            - testIntegralImage.getPixelsRef()[ i*testHeight+ (j - boxFilterSize) ];
+            - testIntegralImage.getPixelsRef()[ i * testHeight+ (j - boxFilterSize) ];
             
             
-            
-            cout<< tempCalc << " ";
-            
-            newBlurImage.getPixelsRef()[i * testWidth + j] = tempCalc;
+            float normalizedCalc = tempCalc;
+            cout<< normalizedCalc << " ";
+            newBlurImage.getPixelsRef()[i * testWidth + j] = normalizedCalc ;
 
         }
         
@@ -176,7 +218,45 @@ ofImage ofApp::createTestImage (ofImage image)
 }
 
 
+void ofApp::drawNumbers()
+{
+    //time to draw all the numbers image, integral,blurred
+    //use ofDrawBitmapToString
+    
+    
+    for ( int a = 0 ; a < testHeight ; a ++)
+    {
+        for ( int b = 0 ; b < testWidth ; b++ )
+        {
+            //cout<< "entering loop";
+            
+            float testOneImageValue =  testOneImage.getPixelsRef()[ a * testWidth + b ] ;
+            float testIntegralImageValue = testIntegralImage.getPixelsRef()[ a * testWidth + b ] ;
+            float blurImageValue = newBlurImage.getPixelsRef()[ a * testWidth + b ] ;
+            
+            int xDisplacement = 100 ;
+            int yDisplacement = 300 ;
+            int multiplier = 25;
+            ofDrawBitmapString( ofToString( testOneImageValue ) , a * multiplier + xDisplacement , b* multiplier + yDisplacement);
+            
+            ofDrawBitmapString( ofToString( testIntegralImageValue ) , a * multiplier + 5.5 * xDisplacement, b* multiplier + yDisplacement);
+            
+            if( ( a>=boxFilterSize && a <= testHeight - boxFilterSize) && ( b>=boxFilterSize && b <= testWidth - boxFilterSize))
+                ofDrawBitmapString( ofToString( blurImageValue ) , a * multiplier + 10 * xDisplacement, b* multiplier + yDisplacement);
+            
+            
+            
 
+            
+        }
+        
+        
+    }
+    
+
+    
+    
+}
 
 
 

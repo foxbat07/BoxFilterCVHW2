@@ -28,10 +28,11 @@ class ofApp : public ofBaseApp{
         ofImage calculateIntegralImage (ofImage image);
         ofImage blurImage (ofImage image);
         ofImage createTestImage (ofImage image);
+        void drawNumbers();
     
     
     
-        int boxFilterSize = 5;
+        int boxFilterSize = 3;
         int testHeight = 10 + 2 * boxFilterSize;
         int testWidth = 10 + 2 * boxFilterSize;
         
